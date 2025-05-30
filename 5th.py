@@ -1,0 +1,189 @@
+import numpy as np
+from opfunu.cec_based import cec2022
+
+class Search:
+    def __init__(self, func, lb, ub):
+        self.func = func
+        self.lb = np.array(lb)
+        self.ub = np.array(ub)
+        self.dim = len(lb)
+
+class BestDescentLocalSearch:
+    def __init__(self, search, max_iters=5000, neighborhood_size=100, delta=0.1):
+        self.search = search
+        self.max_iters = max_iters
+        self.neighborhood_size = neighborhood_size
+        self.delta = delta
+
+    def _generate_neighbors(self, current):
+        """
+        Generates random neighbors around the current point, clipped within bounds.
+        """
+        perturbations = np.random.uniform(-self.delta, self.delta, size=(self.neighborhood_size, self.search.dim))
+        neighbors = current + perturbations
+        neighbors = np.clip(neighbors, self.search.lb, self.search.ub)
+        return neighbors
+
+    def run(self):
+        current = np.random.uniform(self.search.lb, self.search.ub)  # Random starting point
+        current_val = self.search.func.evaluate(current.tolist())
+
+        for _ in range(self.max_iters):
+            neighbors = self._generate_neighbors(current)
+            values = np.array([self.search.func.evaluate(n.tolist()) for n in neighbors])
+            best_idx = np.argmin(values)
+            best_val = values[best_idx]
+
+            if best_val < current_val:
+                current = neighbors[best_idx]
+                current_val = best_val
+            else:
+                break  # No improvement found
+
+        return current, current_val
+
+class GuidedLocalSearch:
+    def __init__(self, search, max_iters=5000, neighborhood_size=100, delta=0.1, lamb=0.01):
+        self.search = search
+        self.max_iters = max_iters
+        self.neighborhood_size = neighborhood_size
+        self.delta = delta
+        self.lamb = lamb  # penalty weight
+
+        self.penalties = np.zeros((self.search.dim,))  # one penalty per dimension
+
+    def _generate_neighbors(self, current):
+        perturbations = np.random.uniform(-self.delta, self.delta, size=(self.neighborhood_size, self.search.dim))
+        neighbors = current + perturbations
+        return np.clip(neighbors, self.search.lb, self.search.ub)
+
+    def _penalized_eval(self, x):
+        """
+        Returns original cost + lambda * penalty term.
+        Each dimension contributes penalty if value changes a lot.
+        """
+        x_arr = np.array(x)
+        raw_val = self.search.func.evaluate(x_arr.tolist())
+        penalty_term = np.sum(self.penalties * np.abs(x_arr))
+        return raw_val + self.lamb * penalty_term
+
+    def _update_penalties(self, x):
+        """
+        Increases penalty on dimensions with largest utility.
+        Utility is abs(value) / (1 + penalty).
+        """
+        x_arr = np.abs(np.array(x))
+        utilities = x_arr / (1 + self.penalties)
+        max_util_idx = np.argmax(utilities)
+        self.penalties[max_util_idx] += 1
+
+    def run(self):
+        current = np.random.uniform(self.search.lb, self.search.ub)
+        current_val = self._penalized_eval(current)
+        best_true = self.search.func.evaluate(current.tolist())
+        best_point = current.copy()
+
+        for _ in range(self.max_iters):
+            neighbors = self._generate_neighbors(current)
+            penalties = np.array([self._penalized_eval(n) for n in neighbors])
+            best_idx = np.argmin(penalties)
+
+            if penalties[best_idx] < current_val:
+                current = neighbors[best_idx]
+                current_val = penalties[best_idx]
+
+                raw_val = self.search.func.evaluate(current.tolist())
+                if raw_val < best_true:
+                    best_true = raw_val
+                    best_point = current.copy()
+            else:
+                self._update_penalties(current)
+
+        return best_point, best_true
+
+class GeneticAlgorithm:
+    def __init__(self, search, population_size=50, generations=1000, mutation_rate=0.1, tournament_size=3):
+        self.search = search
+        self.population_size = population_size
+        self.generations = generations
+        self.mutation_rate = mutation_rate
+        self.tournament_size = tournament_size
+
+    def _initialize_population(self):
+        return np.random.uniform(self.search.lb, self.search.ub, size=(self.population_size, self.search.dim))
+
+    def _evaluate_population(self, population):
+        return np.array([self.search.func.evaluate(ind.tolist()) for ind in population])
+
+    def _tournament_selection(self, population, fitness):
+        indices = np.random.choice(len(population), size=self.tournament_size, replace=False)
+        best_idx = indices[np.argmin(fitness[indices])]
+        return population[best_idx]
+
+    def _crossover(self, parent1, parent2):
+        mask = np.random.rand(self.search.dim) < 0.5
+        child = np.where(mask, parent1, parent2)
+        return child
+
+    def _mutate(self, individual):
+        mutation = np.random.uniform(-1, 1, size=self.search.dim)
+        mutation_mask = np.random.rand(self.search.dim) < self.mutation_rate
+        individual[mutation_mask] += mutation[mutation_mask]
+        return np.clip(individual, self.search.lb, self.search.ub)
+
+    def run(self):
+        population = self._initialize_population()
+        fitness = self._evaluate_population(population)
+        best_idx = np.argmin(fitness)
+        best_point = population[best_idx].copy()
+        best_val = fitness[best_idx]
+
+        for _ in range(self.generations):
+            new_population = []
+            for _ in range(self.population_size):
+                parent1 = self._tournament_selection(population, fitness)
+                parent2 = self._tournament_selection(population, fitness)
+                child = self._crossover(parent1, parent2)
+                child = self._mutate(child)
+                new_population.append(child)
+            population = np.array(new_population)
+            fitness = self._evaluate_population(population)
+            current_best_idx = np.argmin(fitness)
+            if fitness[current_best_idx] < best_val:
+                best_point = population[current_best_idx].copy()
+                best_val = fitness[current_best_idx]
+
+        return best_point, best_val
+
+
+if __name__ == '__main__':
+    functions = [
+        cec2022.F12022, cec2022.F22022, cec2022.F32022, cec2022.F42022,
+        cec2022.F52022, cec2022.F62022, cec2022.F72022, cec2022.F82022,
+        cec2022.F92022, cec2022.F102022, cec2022.F112022, cec2022.F122022
+    ]
+
+    results = []
+
+    classes = [BestDescentLocalSearch, GuidedLocalSearch, GeneticAlgorithm]
+
+    for c in classes:
+        results = []
+        print(f"Running {c.__name__}")
+
+        for f in functions:
+            func = f(ndim=20)
+            search = Search(func, func.lb, func.ub)
+
+            currentSearch = c(search)
+            best_point, best_value = currentSearch.run()
+            results.append((f.__name__, best_value, best_point))
+            print(f"{f.__name__} - best value: {best_value:.5f}")
+
+        print()
+
+        # Save results
+        with open(f"{c.__name__}_results.txt", "w") as f:
+            for name, val, point in results:
+                coords = "\t".join(f"{x:.10f}" for x in point)
+                f.write(f"Function: {name}\nMinimum value: {val:.10f}\nCoordinates: {coords}\n\n")
