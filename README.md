@@ -7,3 +7,6 @@ Currently present algorithms:
 - Guided local search
 - Genetic algorithm
 - Walrus optimizer ([explanation](https://www.nature.com/articles/s41598-023-35863-5))
+- Random local search
+- Simulated annealing
+- Gradient descent local search

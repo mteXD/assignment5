@@ -8,6 +8,106 @@ class Search:
         self.ub = np.array(ub)
         self.dim = len(lb)
 
+class RandomLocalSearch:
+    def __init__(self, search, max_iters=50000):
+        self.search = search
+        self.max_iters = max_iters
+
+    def run(self):
+            currBestPoint = np.random.uniform(self.search.lb, self.search.ub)
+            currBestVal = self.search.func.evaluate(currBestPoint.tolist())
+            #print(currBestPoint.tolist())
+            for _ in range(self.max_iters):
+                rand_point =  np.random.uniform(self.search.lb, self.search.ub)
+                eval = self.search.func.evaluate(rand_point.tolist())
+                if eval < currBestVal:
+                    currBestPoint = rand_point
+                    currBestVal = eval
+            return currBestPoint, currBestVal
+
+class GradientDescentLocalSearch:   
+    def __init__(self, search, stepSize=1, max_iters=5000):
+        self.search = search
+        self.max_iters = max_iters
+        self.stepSize = stepSize
+    
+    def __grad(self, vector):
+        grad = np.zeros_like(vector)
+        diff = 1e-5
+        for i in range(self.search.dim):
+            x_plus_diff = vector.copy()
+            x_plus_diff[i] += diff*0.5
+            x_minus_diff = vector.copy()
+            x_minus_diff[i] -= diff*0.5
+            """
+            central difference method
+            https://www.youtube.com/watch?v=safjLBaOWuA&ab_channel=Udacity
+            odvod v točki X = (f(vector[i]+diff*0.5) - f(vector[i]-diff*0.5))/ diff
+            """
+            f_plus = self.search.func.evaluate(x_plus_diff.tolist())
+            f_minus = self.search.func.evaluate(x_minus_diff.tolist())
+            grad[i] = (f_plus - f_minus) / diff
+        return grad
+    
+    def run(self):
+        bestPoint = np.random.uniform(self.search.lb, self.search.ub)
+        x = bestPoint
+        bestValue = self.search.func.evaluate(bestPoint.tolist())
+        f_x = bestValue
+        for _ in range(0, self.max_iters, self.stepSize):
+            x_next = x - self.stepSize * self.__grad(x)
+            x_next = np.clip(x_next, self.search.lb, self.search.ub)
+            f_next = self.search.func.evaluate(x_next.tolist())
+            if(f_next < f_x):
+                bestPoint = x_next
+                bestValue = f_next
+            x = x_next
+            f_x = f_next 
+        return bestPoint, bestValue
+
+class SimulatedAnnealing:
+    def __init__(self, search, max_iters=500000, initial_temp=10000.0, lambda_=0.9995, delta=0.1):
+        self.search = search
+        self.max_iters = max_iters
+        self.initial_temp = initial_temp
+        self.lambda_ = lambda_  # cooling rate
+        self.delta = delta      # neighborhood perturbation range
+
+    def _neighbor(self, s):
+        neighbor = s + np.random.uniform(-self.delta, self.delta, size=self.search.dim)
+        return np.clip(neighbor, self.search.lb, self.search.ub)
+
+    def run(self):
+        currentPoint = bestPoint = np.random.uniform(self.search.lb, self.search.ub)
+        bestValue = self.search.func.evaluate(bestPoint.tolist())
+        currentValue = bestValue
+        T = self.initial_temp
+
+        for _ in range(self.max_iters):
+            neighbour = self._neighbor(currentPoint)
+            neighbourValue = self.search.func.evaluate(neighbour.tolist())
+
+            # If S' is better than best-so-far
+            if neighbourValue < bestValue:
+                bestPoint = neighbour
+                bestValue = neighbourValue
+
+            # If S' is better than current, accept
+            if neighbourValue < currentValue:
+                currentPoint = neighbour
+                currentValue = neighbourValue
+            else:
+                # Maybe accept worse S'
+                prob = np.exp(-(neighbourValue - currentValue) / T)
+                if np.random.rand() < prob:
+                    currentPoint = neighbour
+                    currentValue = neighbourValue
+
+            # Cool down
+            T *= self.lambda_
+
+        return bestPoint, bestValue
+
 class BestDescentLocalSearch:
     def __init__(self, search, max_iters=5000, neighborhood_size=100, delta=0.1):
         self.search = search
@@ -102,10 +202,10 @@ class GuidedLocalSearch:
         return best_point, best_true
 
 class GeneticAlgorithm:
-    def __init__(self, search, population_size=50, generations=1000, mutation_rate=0.1, tournament_size=3):
+    def __init__(self, search, population_size=50, max_iters=1000, mutation_rate=0.1, tournament_size=3):
         self.search = search
         self.population_size = population_size
-        self.generations = generations
+        self.max_iters = max_iters
         self.mutation_rate = mutation_rate
         self.tournament_size = tournament_size
 
@@ -138,7 +238,7 @@ class GeneticAlgorithm:
         best_point = population[best_idx].copy()
         best_val = fitness[best_idx]
 
-        for _ in range(self.generations):
+        for _ in range(self.max_iters):
             new_population = []
             for _ in range(self.population_size):
                 parent1 = self._tournament_selection(population, fitness)
@@ -196,7 +296,6 @@ class WalrusOptimizer:
 
         return best_pos, best_val
 
-
 if __name__ == '__main__':
     functions = [
         cec2022.F12022, cec2022.F22022, cec2022.F32022, cec2022.F42022,
@@ -206,8 +305,7 @@ if __name__ == '__main__':
 
     results = []
 
-    classes = [BestDescentLocalSearch, GuidedLocalSearch, GeneticAlgorithm, WalrusOptimizer]
-
+    classes = [BestDescentLocalSearch, GuidedLocalSearch, GeneticAlgorithm, WalrusOptimizer, RandomLocalSearch, GradientDescentLocalSearch, SimulatedAnnealing]
     for c in classes:
         results = []
         print(f"Running {c.__name__}")
@@ -216,7 +314,7 @@ if __name__ == '__main__':
             func = f(ndim=20)
             search = Search(func, func.lb, func.ub)
 
-            currentSearch = c(search)
+            currentSearch = c(search, max_iters=10000)
             best_point, best_value = currentSearch.run()
             results.append((f.__name__, best_value, best_point))
             print(f"{f.__name__} - best value: {best_value:.5f}")
