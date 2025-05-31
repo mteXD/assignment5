@@ -155,6 +155,47 @@ class GeneticAlgorithm:
 
         return best_point, best_val
 
+class WalrusOptimizer:
+    def __init__(self, search, population_size=30, max_iters=1000, alpha=1.0, beta=1.5):
+        self.search = search
+        self.population_size = population_size
+        self.max_iters = max_iters
+        self.alpha = alpha  # movement influence
+        self.beta = beta    # attraction to best
+
+    def _initialize_population(self):
+        return np.random.uniform(self.search.lb, self.search.ub, size=(self.population_size, self.search.dim))
+
+    def _evaluate(self, population):
+        return np.array([self.search.func.evaluate(ind.tolist()) for ind in population])
+
+    def run(self):
+        pop = self._initialize_population()
+        fitness = self._evaluate(pop)
+
+        best_idx = np.argmin(fitness)
+        best_pos = pop[best_idx].copy()
+        best_val = fitness[best_idx]
+
+        for _ in range(self.max_iters):
+            for i in range(self.population_size):
+                # Social-inspired movement:
+                rand_vector = np.random.uniform(-1, 1, self.search.dim)
+                direction = self.beta * (best_pos - pop[i]) + self.alpha * rand_vector
+                new_position = pop[i] + direction
+                new_position = np.clip(new_position, self.search.lb, self.search.ub)
+
+                new_val = self.search.func.evaluate(new_position.tolist())
+                if new_val < fitness[i]:
+                    pop[i] = new_position
+                    fitness[i] = new_val
+
+                    if new_val < best_val:
+                        best_val = new_val
+                        best_pos = new_position.copy()
+
+        return best_pos, best_val
+
 
 if __name__ == '__main__':
     functions = [
@@ -165,7 +206,7 @@ if __name__ == '__main__':
 
     results = []
 
-    classes = [BestDescentLocalSearch, GuidedLocalSearch, GeneticAlgorithm]
+    classes = [BestDescentLocalSearch, GuidedLocalSearch, GeneticAlgorithm, WalrusOptimizer]
 
     for c in classes:
         results = []
