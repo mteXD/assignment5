@@ -314,11 +314,9 @@ class WalrusOptimizer:
 
                 rand_vector = np.random.uniform(-1, 1, self.search.dim)
                 random_idx = np.random.choice([j for j in range(len(pop)) if j != i])
-                if (pop[random_idx] < pop[i]):
-                    direction = self.alpha * (pop[random_idx] - pop[i]) * (self.delta * rand_vector)
-                    new_position = pop[i] + direction
-
-                    _update(new_position)
+                direction = self.alpha * (pop[random_idx] - pop[i]) * (self.delta * rand_vector)
+                new_position = pop[i] + direction
+                _update(new_position)
 
                 # Avoiding predators
 
@@ -326,7 +324,6 @@ class WalrusOptimizer:
                 direction = (bound * rand_vector)
                 bound /= self.bound_factor
                 new_position = pop[i] + direction
-                _update(new_position)
 
         return best_pos, best_val
 
