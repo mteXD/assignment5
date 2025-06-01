@@ -275,9 +275,14 @@ $D \subset \mathbb{R}^n$.
     candidate solution is accepted as the next state $x_{k+1}$ with
     the following probability:
 
-    $$ P_{\text{accept}} =
-    \begin{cases} 1 & \text{if} \ \Delta f\leq 0\\ e^{(-\frac{\Delta f}{T_{k}})} & \text{otherwise}
-    \end{cases} $$
+    \[
+      P_{\text{accept}} =
+      \begin{cases} 
+          1 & \text{if} \ \Delta f \leq 0 \\
+
+          e^{\left( - \frac{\Delta f}{T_k} \right)} & \text{otherwise}
+      \end{cases}
+    \]
 
     Then, the temperature is updated according to the cooling
     schedule -- it could be as simple as $T_{k+1} = \alpha T_k$,
