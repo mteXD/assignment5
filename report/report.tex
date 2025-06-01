@@ -40,15 +40,18 @@
 
 \author{
   \textbf{Arne Salobir} \\
-  % \texttt{} \\
+  \texttt{as40762@student.uni-lj.si} \\[0.5em]
   \textbf{Matic Poženel} \\
-  % \texttt{}
+  \texttt{mp04643@student.uni-lj.si}
 }
 
 \date{\today}
 
 \begin{document}
+
 \maketitle
+
+\hrule
 
 \begin{abstract}
   This report presents 7 heuristic algorithms with test cases
@@ -58,7 +61,13 @@
   result of the python script that is also a part of this assignment for AAHPS.
 \end{abstract}
 
+\vspace{1em}
+
+\hrule
+
 \tableofcontents
+
+\newpage
 
 \section{Random Local Search}
 
@@ -1271,11 +1280,12 @@ produced the following results:
 
 \subsection{Description}
 
-Walrus Optimization (WaO) is a nature-inspired optimization algorithm
-that simulates the behavior of walruses in their natural habitat.
-It mimics their social behavior and foraging strategies to explore the
-solution space effectively -- walruses often congregate around dominant
-or more experienced individuals in order to find better food sources.
+Walrus Optimization (WaO) \cite{walrus} is a nature-inspired
+optimization algorithm that simulates the behavior of walruses in
+their natural habitat. It mimics their social behavior and foraging
+strategies to explore the solution space effectively -- walruses
+often congregate around dominant or more experienced individuals in
+order to find better food sources.
 
 Similarly, the algorithm starts with a population of walruses, each
 representing a candidate solution. The algorithm evaluates the
@@ -1296,10 +1306,18 @@ Let's summarize the key steps of the Walrus Optimization algorithm:
   \item \textbf{Exploration phase}: we first calculate the new
     position ${X}_{i}^{{P}_{1}}$ for the $i$-th walrus. For the $j$-th dimension
     of this position, we use the following equation:
-    $$
-    {x}_{i,j}^{P_1} = x_{i,j} + rand_{i,j} \cdot \left( SW_j -
-    I_{i,j} \cdot x_{i,j} \right)
-    $$
+
+    \[
+      {x}_{i,j}^{P_1} = x_{i,j} + rand_{i,j} \cdot \left( SW_j -
+      I_{i,j} \cdot x_{i,j} \right)
+    \]
+
+    where $x_{i,j}$ is the current position of the $i$-th walrus in
+    the $j$-th dimension, $SW_j$ is the best position in the $j$-th
+    dimension among all walruses, and $rand_{i,j}$ is a random number
+    in the range $[0, 1]$. $I_{i,j}$ can either be $1$ or $2$ is a
+    factor that determines the algorithm's exploration behavior -- if
+    set to $2$, the search is broader.
 
     We only update the best position if the objective value
     $F_i^{P_1}$ is an improvement compared to the previous objective value:
@@ -1311,184 +1329,256 @@ Let's summarize the key steps of the Walrus Optimization algorithm:
     \end{cases}
     $$
 
-  \item \textbf{Migration phase}:
+  \item \textbf{Migration phase}: to mimic walruses' search of unexplored areas,
+    the algorithm allows for a walrus (solution) to move in the direction of
+    another random walrus in this phase, using this equation:
 
-    we
+    \[
+      {x}_{i,j}^{{P}_{2}}=
+      \begin{cases}
+        {x}_{i,j}+{rand}_{i,j}\cdot \left({x}_{k,j}-{I}_{i,j}\cdot
+        {x}_{i,j}\right), {F}_{k}<{F}_{i}\,;\\
+
+        {x}_{i,j}+{rand}_{i,j}\cdot \left({x}_{i,j}-{x}_{k,j}\right), else\,,
+      \end{cases}
+    \]
+
+    where $k$ is the index of the random walrus chosen for migration,
+    $rand_{i,j}$ is a random number in the range $[0, 1]$, and
+    $I_{i,j}$ is, again, a factor that determines the algorithm's
+    exploration behavior. $F_k$ and $F_i$ are walruses' objective
+    function values. The indicator $P_2$ indicates that this is the
+    second phase of the algorithm,
+
+    Then, we update the position of the $i$-th walrus if the
+    objective value $F_i^{P_2}$ is an improvement compared to the
+    previous objective value $F_i$:
+
+    \[
+      {X}_{i}=
+      \begin{cases}
+        {X}_{i}^{{P}_{2}}, & {F}_{i}^{{P}_{2}}<{F}_{i}\,;\\
+
+        {X}_{i}, & else\,,
+      \end{cases}
+    \]
+
+  \item \textbf{Exploitation phase}: in this phase, the algorithm
+    refines the current solution by applying a local search strategy.
+
+    We have decided to simplify this strategy to use a random vector
+    in the direction of which the current walrus will move.
+
+    It generates a new position ${X}_{i}^{{P}_{3}}$ for the $i$-th walrus
+    using the following equation:
+
+    \[
+      x_{i,j}^{P_3}=x_{i,j} + rand \cdot \left( I_{i,j} \cdot \delta \right)
+    \]
+
+    where $x_{i,j}$ is the current position of the $i$-th walrus in
+    the $j$-th dimension, $rand$ is a random number in the range
+    $[0, 1]$, $I_{i,j}$ is the same exploration factor as in the previous
+    phases. $\delta$ is the amount exploration we want to do, and is
+    decreasing every iteration -- this ensures that we explore more in the
+    beginning stages, where there is more uncertainty, and less in the
+    later stages, where we want to refine the solution.
+
+    Finally, we update the position of the $i$-th walrus if the
+    objective value $F_i^{P_3}$ is an improvement compared to the
+    previous objective value $F_i$:
+
+    \[
+      {X}_{i}=
+      \begin{cases}
+        {X}_{i}^{{P}_{3}}, & {F}_{i}^{{P}_{3}}<{F}_{i}\,;\\
+
+        {X}_{i}, & else\,,
+      \end{cases}
+    \]
+
+  \item \textbf{Termination}: the algorithm terminates after a
+    predefined number of iterations
+
 \end{enumerate}
 
 \subsection{Results}
+
+For all our cases, we used $I_{i,j} = 1$.
 
 Running the walrus optimizer on the \textit{opfunu} library
 produced the following results:
 
 \begin{itemize}
   \item \textbf{Function: F12022}: \\
-    Minimum value: 302.6763 \\
-    Coordinates:
+    Minimum value: 300.0000 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -56.1323, 4.6219, 34.9392, 8.1007, \\
-        & -46.9128, 7.8517, 7.0120, -2.4742, \\
-        & -61.0648, -46.6958, -20.8121, \\
-        & 11.7441, -12.8089, 46.0916, 61.6492, \\
-        & 34.9307, 32.3912, 77.7158, 22.3357, \\
-        & -74.0099
+        & -55.9383, 4.5430, 35.3000, 8.2794, \\
+        & -47.4369, 7.3020, 6.3876, -2.4978, \\
+        & -61.0535, -47.1339, -21.0761, \\
+        & 12.4797, -13.2393, 46.1082, 61.0147, \\
+        & 34.8255, 32.6481, 77.8165, 22.1958, \\
+        & -74.0837
       \end{aligned}
     \]
 
   \item \textbf{Function: F22022}: \\
-    Minimum value: 469.8376 \\
-    Coordinates:
+    Minimum value: 449.0844 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & 0.7780, -5.8204, -48.6760, 15.1720, \\
-        & -5.6382, -46.7422, 22.1244, 22.6837, \\
-        & -18.9858, 92.9942, 38.4945, 38.3074, \\
-        & -23.7684, 54.5879, 39.4925, 11.5067, \\
-        & 15.7787, -54.7010, -67.4148, -55.8826
+        & -21.5522, -83.8421, -49.2557, \\
+        & 73.3635, 56.3907, 28.5792, 57.1972, \\
+        & -50.0250, -71.4323, 100.0000, \\
+        & -1.1496, 20.1646, -100.0000, 63.3213, \\
+        & -22.8487, 55.8117, -8.6902, -18.6794, \\
+        & -14.2598, -44.5203
       \end{aligned}
     \]
 
   \item \textbf{Function: F32022}: \\
     Minimum value: 600.0000 \\
-    Coordinates:
+    Coodrinates:
     \[
       \begin{aligned}
-        & 78.5436, -24.6003, -34.4814, \\
-        & -44.7111, 75.7991, 16.4873, -21.8569, \\
-        & 5.8190, 65.4618, 51.6130, 60.4794, \\
-        & 9.8416, -23.0035, 71.5824, -77.8140, \\
-        & 77.1861, 63.0159, -15.4947, -68.5957, \\
-        & 58.5947
+        & 79.0894, -24.5727, -34.6739, \\
+        & -44.6816, 75.9978, 16.3633, -21.7429, \\
+        & 5.6586, 64.9855, 51.2679, 60.6134, \\
+        & 10.4799, -22.7481, 71.5941, -77.8486, \\
+        & 77.0383, 63.2584, -15.5785, -69.0629, \\
+        & 59.1494
       \end{aligned}
     \]
 
   \item \textbf{Function: F42022}: \\
-    Minimum value: 1068.5023 \\
-    Coordinates:
+    Minimum value: 965.9073 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -98.6327, 35.6232, 58.2649, -40.9013, \\
-        & 13.5067, -17.4336, -9.9119, -53.2327, \\
-        & 43.3621, -4.7748, -42.6878, 12.1296, \\
-        & 82.4936, 73.2771, -22.1770, -51.7843, \\
-        & -3.7240, 19.2684, 19.4580, -25.4849
+        & 40.6481, -39.5837, 51.1098, -53.4598, \\
+        & -43.3039, -61.9668, -31.0395, \\
+        & -37.6999, 0.5247, 37.2781, -43.4073, \\
+        & 58.4872, 68.3771, -14.7045, -23.0177, \\
+        & -15.8284, -8.9651, 21.8166, 61.6015, \\
+        & -65.2621
       \end{aligned}
     \]
 
   \item \textbf{Function: F52022}: \\
-    Minimum value: 914.8666 \\
-    Coordinates:
+    Minimum value: 900.0000 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -30.9397, -87.5309, 75.5830, \\
-        & 100.0000, -86.5297, -14.9946, \\
-        & -71.1019, 9.5632, 93.9427, -46.4963, \\
-        & 3.8062, -90.6562, 47.3464, -52.9511, \\
-        & -45.7508, -8.4268, 87.2898, -61.3721, \\
-        & 77.2975, -7.7868
+        & -24.8562, 0.9342, 21.9939, 51.9867, \\
+        & -18.4026, -12.3748, 16.0883, -3.3254, \\
+        & -51.3379, 42.4095, -22.8107, \\
+        & -19.6838, 52.9744, -58.5381, \\
+        & -10.7501, -38.6760, 51.9584, \\
+        & -14.5689, -59.7738, 21.1111
       \end{aligned}
     \]
 
   \item \textbf{Function: F62022}: \\
-    Minimum value: 187352.0376 \\
-    Coordinates:
+    Minimum value: 64012.6999 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -43.3577, -99.9823, -96.5426, \\
-        & -78.9994, -97.2903, 61.0570, \\
-        & -36.1923, -99.3836, 91.9114, \\
-        & -13.6392, 90.6628, -18.9568, \\
-        & -99.5035, 67.5339, -73.7692, 59.2467, \\
-        & 98.2256, 68.6765, -2.7086, -55.5675
+        & 88.2382, 12.4739, 1.7324, 100.0000, \\
+        & -88.8065, -90.8159, 12.3811, \\
+        & -47.8081, -100.0000, -98.5075, \\
+        & -54.1187, 35.4977, 31.6484, -98.6586, \\
+        & -100.0000, 47.4536, 21.0262, \\
+        & 100.0000, -79.2168, 6.7297
       \end{aligned}
     \]
 
   \item \textbf{Function: F72022}: \\
-    Minimum value: 2023.1090 \\
-    Coordinates:
+    Minimum value: 1757.2529 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -12.3219, -96.1514, 25.5594, 85.5629, \\
-        & 52.0314, -90.3862, 57.4810, 96.5804, \\
-        & -66.8097, -41.8509, 99.8611, 18.8077, \\
-        & 100.0000, -92.9992, -67.2839, \\
-        & 43.5645, 20.6064, 36.1288, -14.1783, \\
-        & -92.9064
+        & -25.1101, 7.6560, -100.0000, 63.4230, \\
+        & 82.6309, -100.0000, 100.0000, \\
+        & 86.3029, -26.3618, -99.7547, \\
+        & 100.0000, -94.5610, 99.8822, \\
+        & -63.7432, 25.2384, -59.1929, 37.3520, \\
+        & -54.0342, 18.9891, 32.4193
       \end{aligned}
     \]
 
   \item \textbf{Function: F82022}: \\
-    Minimum value: 2079.3809 \\
-    Coordinates:
+    Minimum value: 2843.2251 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -71.0575, 77.4072, 100.0000, \\
-        & -50.1888, 42.3815, 80.3013, 74.2704, \\
-        & 86.4677, 19.7918, 7.3317, 78.4620, \\
-        & 7.1291, 84.6672, 36.2093, -81.6888, \\
-        & -30.6541, 29.9037, 97.2382, 72.3458, \\
-        & 47.5318
+        & -100.0000, 60.5723, 46.4654, \\
+        & -40.3796, 90.4547, -16.3007, 62.1669, \\
+        & -100.0000, 17.1549, 79.5774, 79.7394, \\
+        & 100.0000, -100.0000, -7.0850, \\
+        & 27.9277, -100.0000, 100.0000, \\
+        & -99.9301, 8.8167, 48.2142
       \end{aligned}
     \]
 
   \item \textbf{Function: F92022}: \\
-    Minimum value: 2635.7372 \\
-    Coordinates:
+    Minimum value: 2635.6387 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -29.9654, -100.0000, -100.0000, \\
-        & -93.4492, -100.0000, 25.3226, \\
-        & 99.7415, -100.0000, -100.0000, \\
-        & 63.1122, 79.2730, 100.0000, 74.9921, \\
-        & -100.0000, 100.0000, -33.8861, \\
-        & 68.9002, -26.3155, -1.4629, -100.0000
+        & -30.4959, -100.0000, -100.0000, \\
+        & -93.7162, -100.0000, 24.5937, \\
+        & 100.0000, -100.0000, -100.0000, \\
+        & 63.6760, 85.8860, 100.0000, 77.7213, \\
+        & -100.0000, 100.0000, -34.8837, \\
+        & 68.7098, -25.5160, -1.1148, -100.0000
       \end{aligned}
     \]
 
   \item \textbf{Function: F102022}: \\
-    Minimum value: -292.3534 \\
-    Coordinates:
+    Minimum value: -1831.8119 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -36.1836, -64.0700, 0.5543, -76.4321, \\
-        & 33.6231, -27.5243, 29.6114, -40.8580, \\
-        & -80.8448, -44.4385, -38.4617, \\
-        & -73.8601, -11.9169, -65.8772, \\
-        & -95.7777, -60.1365, -81.1671, \\
-        & -3.5140, -74.0471, 22.3790
+        & -16.5541, -20.3195, 52.8543, \\
+        & -46.0069, -89.7220, 100.0000, \\
+        & 40.6796, -33.6789, -93.9860, 68.9439, \\
+        & -100.0000, 25.0928, 100.0000, \\
+        & -34.6507, 96.8324, 100.0000, 90.6696, \\
+        & -100.0000, 100.0000, 14.9175
       \end{aligned}
     \]
 
   \item \textbf{Function: F112022}: \\
-    Minimum value: 2600.4539 \\
-    Coordinates:
+    Minimum value: 2600.0000 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & 49.2463, 7.6507, -32.8054, 5.2199, \\
-        & 70.8519, 45.3516, 29.2618, 12.8356, \\
-        & 16.9424, -56.8467, 47.1302, -65.3695, \\
-        & 70.4506, -17.8262, -46.1034, 25.6200, \\
-        & 9.8143, -56.9655, 60.1200, -40.1884
+        & 49.1789, 7.4383, -32.7652, 4.9697, \\
+        & 70.6254, 45.0120, 29.4488, 12.6652, \\
+        & 16.7543, -56.3655, 47.6944, -65.4314, \\
+        & 71.1961, -17.9616, -45.4999, 25.9986, \\
+        & 9.8086, -57.0468, 60.0945, -40.3027
       \end{aligned}
     \]
 
   \item \textbf{Function: F122022}: \\
-    Minimum value: 3327.7636 \\
-    Coordinates:
+    Minimum value: 2918.7906 \\
+    Coodrinates:
     \[
       \begin{aligned}
-        & -96.6669, 98.5412, 2.0834, -100.0000, \\
-        & -67.8908, 12.8439, 100.0000, 86.0663, \\
-        & 93.5566, 99.5274, -99.0557, 100.0000, \\
-        & -79.8924, -98.2762, -100.0000, \\
-        & -94.9046, 99.3727, -99.7846, 98.6998, \\
-        & 1.7328
+        & 3.9818, 76.6639, -94.7170, -100.0000, \\
+        & 99.7365, 6.2537, 98.8802, 99.8608,    \\
+        & -100.0000, 99.9809, -97.7055,         \\
+        & 99.9992, 99.5001, -99.1228, 41.5872,  \\
+        & 28.9581, 70.1268, -100.0000, 99.9768, \\
+        & -68.1610
       \end{aligned}
     \]
 
 \end{itemize}
 
-\printbibliography[title={References}]
+\printbibliography[heading=bibintoc, title={References}]
 
 \end{document}
