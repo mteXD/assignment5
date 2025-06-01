@@ -1,0 +1,448 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[backend=biber,style=numeric,sorting=none]{biblatex}
+\usepackage[english]{babel}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{minted}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{changepage}
+\usepackage{graphicx}
+\usepackage{refcheck}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{csquotes}
+\usepackage{mwe}
+\usepackage{hyperref, fancyhdr, abstract, times}
+\usepackage{amsmath,amssymb,amsfonts}
+
+\addbibresource{refs.bib} %Imports bibliography file
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Title formatting
+\titleformat{\section}
+{\normalfont\Large\bfseries}
+{\thesection}{1em}{}
+\titleformat{\subsection}
+{\normalfont\large\bfseries}
+{\thesubsection}{1em}{}
+
+% Title page information
+\title{\LARGE \textbf{5th AAHPS Assignment}}
+
+\author{
+  \textbf{Arne Salobir} \\
+  % \texttt{} \\
+  \textbf{Matic Poženel} \\
+  % \texttt{}
+}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  This report presents the 7 heuristic algorithms with test cases
+  from the \textit{opfunu} package \cite{opfunu}.
+\end{abstract}
+
+\section{Random Local Search}
+
+\subsection{Description}
+
+Random Local Search (RLS) is a simple optimization algorithm that
+iteratively explores the solution space by making random changes to
+the current solution. It evaluates the new solution and accepts it if
+it improves upon the current one, otherwise, it continues with the
+current solution. This process is repeated until a stopping criterion
+is met -- in our case, this is a maximum number of iterations, but it
+could also be a satisfactory solution quality or a time limit.
+
+\subsection{Results}
+
+Running the random local search algorithm on the \textit{opfunu} library
+produced the following results:
+
+\begin{itemize}
+  \item \textbf{Function: F12022}: \\
+    Minimum value: $39623.0728669062$ \\
+    Coordinates:
+    $$
+    -67.3879072802,  -7.5538226449,  49.0349491130,
+    -13.0029941956,  -16.4569300873,  -49.1132197685,  -2.0007048233,
+    59.5985707426,  -3.3996445467,  28.7209820316,  70.5346664686,
+    17.0641938626,  57.6198825778,  22.9338097571,  31.4719475255,
+    71.0572742801,  69.4658387565,  64.7949581750,  45.7295977516,
+    -21.6395833786
+    $$
+
+  \item \textbf{Function: F22022}:
+    Minimum value: $2651.8254613096$
+    Coordinates: $$5.5267568486,  -65.6285678850,  -58.9350403892,
+    47.4669411087,  38.9020679242,  -19.9806296654,  67.5978803374,
+    -9.0027740271,  34.5072703351,  67.1072970921,  51.0354084107,
+    9.8031547722,  -10.9559213644,  67.0999241302,  65.3757526535,
+    35.7266077338,  -10.0309996504,  95.7943426482,  -24.1232534248,
+    -37.7923466667$$
+
+  \item \textbf{Function: F32022}:
+    Minimum value: $601.5156231880$
+    Coordinates: $$4.8207154926,  -7.2492674753,  -4.2450086507,
+    -55.1225477636,  59.9889528340,  -11.6213636457,  -18.4178316096,
+    -35.5323992981,  87.5495369439,  3.3867323599,  -16.5612824257,
+    43.9333076248,  -28.5257426250,  41.9307799585,  -30.6918557968,
+    35.8834417982,  58.5972380558,  -59.3145196626,  1.0796090376,
+    42.2982275453$$
+
+  \item \textbf{Function: F42022}:
+    Minimum value: $1252.0517248194$
+    Coordinates: $$67.3961366272,  -4.1039345960,  -72.0467664327,
+    -75.1641317662,  -84.8490707244,  -40.2411054224,  37.5562963921,
+    -10.3965582469,  -99.0039981135,  27.4092178420,  -53.0075600848,
+    71.3849163533,  -33.0760366071,  50.6410752465,  -2.3145992260,
+    53.7754561084,  -49.9141701012,  78.6654285543,  40.3206071441,
+    -7.6396093225$$
+
+  \item \textbf{Function: F52022}:
+    Minimum value: $915.4243120388$
+    Coordinates: $$-74.8117076562,  25.8430079614,  20.6517071331,
+    60.1729487030,  61.7027926157,  -39.8621166198,  96.5551330059,
+    57.3198516846,  -82.9403531786,  -45.6923215524,  -79.0131980076,
+    13.2219627499,  56.3118766250,  -92.7265918671,  -64.5012217823,
+    -22.6515943544,  6.8302549572,  26.3070063680,  -47.0576394144,
+    73.9808880607$$
+
+  \item \textbf{Function: F62022}:
+    Minimum value: $1976965842.7894558907$
+    Coordinates: $$48.0165271420,  -76.8614696108,  71.7577820304,
+    52.0499078312,  -14.8964969869,  -87.7853531629,  -55.9340338672,
+    95.6047538426,  -9.4667536431,  -67.8632338276,  -25.7908846816,
+    28.8830990368,  3.1444738244,  -71.4872201020,  13.7604582730,
+    34.7230828209,  68.2904185857,  45.9675411829,  1.4157603541,
+    -27.5823505005$$
+
+  \item \textbf{Function: F72022}:
+    Minimum value: $4845.5967721097$
+    Coordinates: $$-3.5935925257,  50.0126757956,  -96.6352144223,
+    50.0605472636,  90.7191530398,  -17.9642832493,  46.6689782524,
+    41.7077278391,  -78.8925965736,  88.2055810439,  33.2514597189,
+    -93.5797511431,  12.5244326920,  -61.8936195431,  15.8827203345,
+    -85.4472467043,  66.9454691269,  -74.8394019670,  97.9727373971,
+    -14.6689170177$$
+
+  \item \textbf{Function: F82022}:
+    Minimum value: $451115640.0295203328$
+    Coordinates: $$15.9575446943  89.8391075336  -24.0167407918
+    -84.3759475247  9.8396655235  94.2546752394  55.1439016322
+    30.7664782145  -31.1672048045  -9.2030667686  80.2814278674
+    22.3098657820  -9.2410355445  14.6676451254  -48.4189152224
+    -62.4299208760  -60.1589967261  -55.2346862259  83.9902753288
+    46.1157707426$$
+
+  \item \textbf{Function: F92022}:
+    Minimum value: $4772.8426976289$
+    Coordinates: $$86.6866269426  -29.6161453568  73.1998609070
+    -81.0174456515  -45.3997717158  -20.4802838682  87.8342818638
+    -50.1619372517  32.7422363637  -33.1722902721  7.3293846557
+    77.1895269439  72.8281487685  -14.7237518617  74.7449935473
+    14.1758949347  45.4963757882  -64.9227309879  -18.3750034078
+    -90.4268675973$$
+
+  \item \textbf{Function: F102022}:
+    Minimum value: $3233.6947037421$
+    Coordinates: $$-36.0986066209  -28.1816119127  72.0755209499
+    -65.4300672057  -82.8375674291  66.7584709287  -28.1929501291
+    -29.6888992170  -36.8163719073  -94.7549394151  24.9748138082
+    -65.4035628905  17.5631691853  -77.6493840376  -84.5211004384
+    -36.6647618389  51.9844024910  -77.2829521181  -12.3115218758
+    -26.3126993450$$
+
+  \item \textbf{Function: F112022}:
+    Minimum value: $4418.3799883879$
+    Coordinates: $$54.2548646183  -0.7209899378  10.7332477048
+    33.5353526807  19.7186544196  30.0918543525  29.7189194759
+    -15.6716503298  86.7212245313  -9.5992759103  68.2984319193
+    -38.3342070841  48.9797408926  24.2616097932  32.0761884766
+    12.1980105218  82.4866132809  -86.2198527137  27.0961328841  -99.2211222593$$
+
+  \item \textbf{Function: F122022}:
+    Minimum value: $3465.3264456618$
+    Coordinates: $$-63.7985821997  53.6950300400  -81.1343253186
+    -48.7154973795  -53.4178239683  88.1243415081  65.8941241811
+    85.3185102737  57.6308477191  25.8517981743  -97.7756178377
+    24.0702691153  84.4245995734  48.2687274029  29.7864160386
+    -38.6240455568  98.7671174170  83.0775235924  86.1377494180  76.2793216154 \allowbreak
+    $$
+
+\end{itemize}
+
+\section{Simulated Annealing}
+
+\subsection{Description}
+
+Simulated Annealing (SA) is a probabilistic optimization algorithm
+that mimics the annealing process in metallurgy. It starts with a
+high temperature, allowing the algorithm to explore the solution space
+freely, and gradually cools down, reducing the probability of accepting
+worse solutions. The algorithm accepts worse solutions with a certain
+probability, which decreases as the temperature lowers. This helps
+avoid local minima and allows the algorithm to explore a wider range of
+solutions before converging to a local optimum.
+
+The algorithm for simulated annealing can be described as follows:
+
+Let $f(x)$ be the function to be minimized and defined over some domain
+$D \subset \mathbb{R}^n$.
+
+\begin{enumerate}
+  \item \textit{Initialization}: Start with an initial solution $x_0
+    \in D$, initial temperature $T_0 > 0$, and the iteration counter $k = 0$.
+  \item \textit{Iteration}: create a candidate solution $x'$ in the
+    neighborhood of the current solution $x_k$. Then compute the
+    change in objective value: $\Delta f = f(x') - f(x_k)$. The
+    candidate solution is accepted as the next state $x_{k+1}$ with
+    the following probability:
+
+    $$ P_{\text{accept}} =
+    \begin{cases} 1 & \text{if} \ \Delta f\leq 0\\ \exp\left(
+      -\frac{\Delta f}{T_{k}}\right) & \text{otherwise}
+    \end{cases} $$
+
+    Then, the temperature is updated according to the cooling
+    schedule -- it could be as simple as $T_{k+1} = \alpha T_k$,
+    where $\alpha < 1$ is a cooling factor. Finally, increment the
+    iteration counter: $k = k + 1$.
+  \item \textit{Termination}: Repeat the iteration step until a
+    stopping criterion is met -- in our case, this is a maximum
+    number of iterations.
+\end{enumerate}
+
+\subsection{Results}
+
+\section{Gradient Descent Search}
+
+\subsection{Description}
+
+Gradient Descent Search (GDS) is an optimization algorithm that uses
+the gradient of the objective function to find the direction in which
+it must move to find a local minimum. It starts with an initial
+solution and iteratively moves in the direction of the steepest
+descent, which is determined by the negative gradient of the
+objective function. The step size can be fixed or adaptive, and the
+algorithm continues until it reaches a local minimum or a stopping
+criterion is met.
+
+The algorithm proceeds as follows:
+
+Let $f(x)$ be the function to be minimized and defined over some domain
+$D \subset \mathbb{R}^n$.
+
+\begin{enumerate}
+  \item \textit{Initialization}: Start with an initial solution $X_0
+    \in D$ and set the iteration counter $k = 0$.
+  \item \textit{Iteration}: Compute the gradient of the objective
+    function at the current solution: $\nabla f(X_k)$. Then, update
+    the current solution by moving in the direction of the steepest
+    descent:
+
+    $$ x_{k+1} = x_k - \alpha \nabla f(x_k) $$
+
+    where $\alpha > 0$ is the step size. Finally, increment the
+    iteration counter: $k = k + 1$.
+  \item \textit{Termination}: Repeat the iteration step until a
+    stopping criterion is met -- in our case, this is a maximum
+    number of iterations.
+\end{enumerate}
+
+\subsection{Results}
+
+\section{Best Descent Local Search}
+
+\subsection{Description}
+
+Best Descent Local Search (BDLS) is a local search algorithm that
+starts with an initial solution and iteratively explores its
+neighborhood. At each iteration, it evaluates $N$ neighboring solutions
+and selects the one with the best objective function value. If this
+neighboring solution improves upon the current solution, it becomes the
+new current solution. The process continues until no neighboring
+solution improves upon the current one, at which point the algorithm
+terminates, having found a local optimum.
+
+\begin{enumerate}
+  \item \textit{Initialization}: Start with an initial solution $X_0$
+    and set the iteration counter $k = 0$.
+  \item \textit{Iteration}: Generate a set of $N$ neighboring solutions
+    by adding random noise (amount of noise is controlled by our
+    parameter $\delta$) to the current solution (current best value). For each
+    neighboring solution, compute the objective function value. Select
+    the neighboring solution with the best objective function value
+    as the new current solution. If this neighboring solution improves
+    upon the current solution, update the current solution to this new
+    one. Finally, increment the iteration counter: $k = k + 1$.
+  \item \textit{Termination}: Repeat the iteration step until a
+    stopping criterion is met -- in our case, this is a maximum number
+    of iterations.
+\end{enumerate}
+
+\subsection{Results}
+
+\section{Guided Local Search}
+
+\subsection{Description}
+
+Guided Local Search (GLS) is an extension of local search algorithms
+that incorporates additional information to guide the search process.
+It uses a penalty mechanism to discourage the algorithm from revisiting
+previously explored solutions. The algorithm maintains a set of
+penalties for different features of the solution, and when a solution is
+accepted, the penalties are updated based on the features of the
+solution. This helps the algorithm explore new areas of the solution
+space and avoid getting stuck in local minima.
+
+The algorithm can be summarized as follows:
+Let $f(x)$ be the function to be minimized and defined over some domain
+$D \subset \mathbb{R}^n$.
+
+\begin{enumerate}
+  \item \textit{Initialization}: Start with an initial solution $X_0
+    \in D$, a penalty vector $P_0$ initialized to zero, and set the
+    iteration counter $k = 0$.
+  \item \textit{Iteration}: Generate a set of neighboring solutions
+    by adding random noise to the current solution. For each
+    neighboring solution, compute the objective function value
+    adjusted by the penalties: $f'(x) = f(x) + P(x)$. Select the
+    neighboring solution with the best adjusted objective function
+    value as the new current solution. Update the penalties based on
+    the features of the new solution. The new penalty vector is
+    computed using the so-called utility value, which is computed as
+    $\text{max}\left( \frac{|\text{values}|}{1 + \text{penalty}}
+    \right)$, where \textit{values} represents the vector of all
+    current neighbors. Finally, increment the iteration counter: $k = k + 1$.
+  \item \textit{Termination}: Repeat the iteration step until a
+    stopping criterion is met -- in our case, this is a maximum
+    number of iterations.
+\end{enumerate}
+
+\subsection{Results}
+
+\section{Genetic Algorithm}
+
+\subsection{Description}
+
+Genetic Algorithm (GA) is a population-based optimization algorithm
+that mimics the process of natural selection. It starts with a
+population of candidate solutions, which are evaluated based on their
+fitness. The algorithm selects the best solutions to form a new
+generation through crossover and mutation operations. Crossover combines
+two parent solutions to create offspring, while mutation introduces
+random changes to the offspring. The process continues for a number of
+generations, with the hope of evolving better solutions over time.
+
+The algorithm can be summarized as follows:
+
+Let $f(x)$ be the function to be minimized and defined over some domain
+$D \subset \mathbb{R}^n$.
+
+\begin{enumerate}
+  \item \textit{Initialization}: Start with a population of $N$
+    candidate solutions, each represented as a vector $X_i \in D$,
+    where $i = 1, 2, \ldots, N$. Set the iteration counter $k = 0$.
+  \item \textit{Iteration}: we perform the following steps for as many
+    \textit{generations} (iterations) as we want to run the algorithm:
+    \begin{enumerate}
+      \item \textit{Evaluation}: Compute the fitness of each candidate
+        solution in the population: $f(X_i)$ for $i = 1, 2, \ldots, N$.
+      \item \textit{Selection}: Select a subset of the best candidate
+        solutions based on their fitness; the size of the subset is
+        called the \textit{tournament size}.
+      \item \textit{Crossover}: Create offspring by combining pairs of
+        selected candidate solutions. For each pair of parents, apply
+        a crossover operator to create one or more offspring. In our
+        case, we create a random mask, based on which we choose
+        either elements from the first parent or the second parent,
+        which leaves us with a new \textit{offspring} solution.
+      \item \textit{Mutation}: Apply a mutation operator to the offspring
+        to introduce random changes. The mutation operator can be as simple
+        as flipping bits in a binary representation or adding random noise
+        to continuous variables -- the latter is the case in our
+        implementation, and we also control the amount of affected
+        values with a \textit{mutation rate} parameter, which is
+        $0.1$ by default.
+      \item \textit{Replacement}: Replace the current population with the
+        new generation of offspring. This can be done by replacing the
+        entire population or by replacing only a portion of it.
+    \end{enumerate}
+  \item \textit{Termination}: Repeat the evaluation, selection,
+    crossover, mutation, and replacement steps until we reach the
+    stopping criterion -- for the genetic algorithm, this is almost
+    always a maximum number of generations.
+\end{enumerate}
+
+\subsection{Results}
+
+\section{Walrus Optimization}
+
+\subsection{Description}
+
+Walrus Optimization (WaO) is a nature-inspired optimization algorithm
+that simulates the behavior of walruses in their natural habitat.
+It mimics their social behavior and foraging strategies to explore the
+solution space effectively -- walruses often congregate around dominant
+or more experienced individuals in order to find better food sources.
+
+Similarly, the algorithm starts with a population of walruses, each
+representing a candidate solution. The algorithm evaluates the
+fitness of each walrus and selects the best ones to form a new
+generation. All other walruses are now attracted to the best walrus,
+which represent the most promising solution. However, the algorithm
+also allows walruses to have random movements (that is, not in the
+direction of the best walrus) to maintain diversity in the population
+and avoid premature convergence to local optima. The walruses move
+through the solution space, exploring new areas and updating their
+positions based on their fitness. The algorithm continues until a
+stopping criterion is met, such as a maximum number of iterations or
+a satisfactory solution quality.
+
+Let's summarize the key steps of the Walrus Optimization algorithm:
+
+\begin{enumerate}
+  \item \textbf{Exploration phase}: we first calculate the new
+    position ${X}_{i}^{{P}_{1}}$ for the $i$-th walrus. For the $j$-th dimension
+    of this position, we use the following equation:
+    $$
+    {x}_{i,j}^{{P}_{1 }} = {x}_{i,j}+{rand}_{i,j} \cdot \left( SW_j -
+    I_{i,j} \cdot x_{i,j} \right)
+    $$
+
+    We only update the best position if the objective value
+    $F_i^{P_1}$ is an improvement
+    compared to the previous objective value:
+
+    $$
+    {X}_{i}=\left\{
+      \begin{array}{ll}{X}_{i}^{{P}_{1}}, &
+        {F}_{i}^{{P}_{1}}<{F}_{i},\\ {X}_{i}, & else,
+      \end{array}
+      \right.
+      $$
+
+    \item \textbf{Migration phase}:
+
+      we
+  \end{enumerate}
+
+  \subsection{Results}
+
+  \printbibliography[title={References}]
+
+  \end{document}

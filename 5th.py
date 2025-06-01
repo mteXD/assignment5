@@ -1,5 +1,9 @@
 import numpy as np
+import time
 from opfunu.cec_based import cec2022
+
+# Constants
+MAX_ITERS = 10000
 
 class Search:
     def __init__(self, func, lb, ub):
@@ -109,7 +113,7 @@ class SimulatedAnnealing:
         return bestPoint, bestValue
 
 class BestDescentLocalSearch:
-    def __init__(self, search, max_iters=5000, neighborhood_size=100, delta=0.1):
+    def __init__(self, search, max_iters=MAX_ITERS, neighborhood_size=100, delta=0.1):
         self.search = search
         self.max_iters = max_iters
         self.neighborhood_size = neighborhood_size
@@ -143,7 +147,7 @@ class BestDescentLocalSearch:
         return current, current_val
 
 class GuidedLocalSearch:
-    def __init__(self, search, max_iters=5000, neighborhood_size=100, delta=0.1, lamb=0.01):
+    def __init__(self, search, max_iters=MAX_ITERS, neighborhood_size=100, delta=0.1, lamb=0.01):
         self.search = search
         self.max_iters = max_iters
         self.neighborhood_size = neighborhood_size
@@ -185,12 +189,12 @@ class GuidedLocalSearch:
 
         for _ in range(self.max_iters):
             neighbors = self._generate_neighbors(current)
-            penalties = np.array([self._penalized_eval(n) for n in neighbors])
-            best_idx = np.argmin(penalties)
+            evaluated = np.array([self._penalized_eval(n) for n in neighbors])
+            best_idx = np.argmin(evaluated)
 
-            if penalties[best_idx] < current_val:
+            if evaluated[best_idx] < current_val:
                 current = neighbors[best_idx]
-                current_val = penalties[best_idx]
+                current_val = evaluated[best_idx]
 
                 raw_val = self.search.func.evaluate(current.tolist())
                 if raw_val < best_true:
@@ -256,7 +260,7 @@ class GeneticAlgorithm:
         return best_point, best_val
 
 class WalrusOptimizer:
-    def __init__(self, search, population_size=30, max_iters=1000, alpha=1.0, beta=1.5):
+    def __init__(self, search, population_size=30, max_iters=MAX_ITERS, alpha=1.0, beta=1.5):
         self.search = search
         self.population_size = population_size
         self.max_iters = max_iters
@@ -310,6 +314,8 @@ if __name__ == '__main__':
         results = []
         print(f"Running {c.__name__}")
 
+        start_time = time.time()
+
         for f in functions:
             func = f(ndim=20)
             search = Search(func, func.lb, func.ub)
@@ -317,8 +323,9 @@ if __name__ == '__main__':
             currentSearch = c(search, max_iters=10000)
             best_point, best_value = currentSearch.run()
             results.append((f.__name__, best_value, best_point))
-            print(f"{f.__name__} - best value: {best_value:.5f}")
+            print(f"\t{f.__name__} - best value: {best_value:.5f}")
 
+        print(f"Time consumed: {time.time() - start_time:.2f}")
         print()
 
         # Save results
