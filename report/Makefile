@@ -10,5 +10,8 @@ all: # clean
 	@clear
 	@lualatex --shell-escape $(FILENAME).tex
 
+single: 
+	@lualatex --shell-escape $(FILENAME).tex
+
 clean:
 	$(RM) *.log *.run.xml *.bcf *.blg *.out *.bbl *.aux *.pdf
