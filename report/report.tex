@@ -1298,13 +1298,12 @@ Let's summarize the key steps of the Walrus Optimization algorithm:
     position ${X}_{i}^{{P}_{1}}$ for the $i$-th walrus. For the $j$-th dimension
     of this position, we use the following equation:
     $$
-    {x}_{i,j}^{{P}_{1 }} = {x}_{i,j}+{rand}_{i,j} \cdot \left( SW_j -
+    {x}_{i,j}^{P_1} = x_{i,j} + rand_{i,j} \cdot \left( SW_j -
     I_{i,j} \cdot x_{i,j} \right)
     $$
 
     We only update the best position if the objective value
-    $F_i^{P_1}$ is an improvement
-    compared to the previous objective value:
+    $F_i^{P_1}$ is an improvement compared to the previous objective value:
 
     $$
     {X}_{i}=

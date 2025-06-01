@@ -260,18 +260,22 @@ class GeneticAlgorithm:
         return best_point, best_val
 
 class WalrusOptimizer:
-    def __init__(self, search, population_size=30, max_iters=MAX_ITERS, alpha=1.0, beta=1.5):
+    def __init__(self, search, population_size=100, max_iters=MAX_ITERS, alpha=1.0, beta=1.5, delta=1, bound_factor=1.05):
         self.search = search
         self.population_size = population_size
         self.max_iters = max_iters
-        self.alpha = alpha  # movement influence
-        self.beta = beta    # attraction to best
+        self.alpha = alpha  # attraction to random other walrus
+        self.beta = beta    # attraction to best walrus
+        self.delta = delta    # movement influence
+        self.bound_factor = bound_factor
 
     def _initialize_population(self):
         return np.random.uniform(self.search.lb, self.search.ub, size=(self.population_size, self.search.dim))
 
     def _evaluate(self, population):
         return np.array([self.search.func.evaluate(ind.tolist()) for ind in population])
+
+
 
     def run(self):
         pop = self._initialize_population()
@@ -281,22 +285,46 @@ class WalrusOptimizer:
         best_pos = pop[best_idx].copy()
         best_val = fitness[best_idx]
 
+        bound = 1
+
+        def _update(new_pos):
+            nonlocal best_val, best_pos
+
+            new_position = np.clip(new_pos, self.search.lb, self.search.ub)
+
+            new_val = self.search.func.evaluate(new_position.tolist())
+            if new_val < fitness[i]:
+                pop[i] = new_position
+                fitness[i] = new_val
+
+                if new_val < best_val:
+                    best_val = new_val
+                    best_pos = new_position.copy()
+
         for _ in range(self.max_iters):
             for i in range(self.population_size):
                 # Social-inspired movement:
                 rand_vector = np.random.uniform(-1, 1, self.search.dim)
-                direction = self.beta * (best_pos - pop[i]) + self.alpha * rand_vector
+                direction = self.beta * (best_pos - pop[i]) * (self.delta * rand_vector)
                 new_position = pop[i] + direction
-                new_position = np.clip(new_position, self.search.lb, self.search.ub)
 
-                new_val = self.search.func.evaluate(new_position.tolist())
-                if new_val < fitness[i]:
-                    pop[i] = new_position
-                    fitness[i] = new_val
+                _update(new_position)
 
-                    if new_val < best_val:
-                        best_val = new_val
-                        best_pos = new_position.copy()
+                # Migration
+
+                rand_vector = np.random.uniform(-1, 1, self.search.dim)
+                random_idx = np.random.choice([j for j in range(len(pop)) if j != i])
+                direction = self.alpha * (pop[random_idx] - pop[i]) * (self.delta * rand_vector)
+                new_position = pop[i] + direction
+
+                _update(new_position)
+
+                # Avoiding predators
+
+                rand_vector = np.random.uniform(-1, 1, self.search.dim)
+                direction = (bound * rand_vector)
+                bound /= self.bound_factor
+                new_position = pop[i] + direction
 
         return best_pos, best_val
 
@@ -309,7 +337,8 @@ if __name__ == '__main__':
 
     results = []
 
-    classes = [BestDescentLocalSearch, GuidedLocalSearch, GeneticAlgorithm, WalrusOptimizer, RandomLocalSearch, GradientDescentLocalSearch, SimulatedAnnealing]
+    # classes = [BestDescentLocalSearch, GuidedLocalSearch, GeneticAlgorithm, WalrusOptimizer, RandomLocalSearch, GradientDescentLocalSearch, SimulatedAnnealing]
+    classes = [WalrusOptimizer]
     for c in classes:
         results = []
         print(f"Running {c.__name__}")
